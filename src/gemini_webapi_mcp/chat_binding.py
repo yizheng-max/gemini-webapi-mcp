@@ -100,8 +100,8 @@ def _candidate_is_in_progress(candidate: object) -> bool:
         completion_status = candidate[8][0]
     except (IndexError, TypeError):
         completion_status = None
-    if completion_status == 1:
-        return True
+    if completion_status is not None:
+        return completion_status == 1
 
     try:
         rich_content = candidate[12]

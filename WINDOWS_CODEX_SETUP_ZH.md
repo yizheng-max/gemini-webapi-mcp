@@ -175,6 +175,9 @@ https://gemini.google.com/u/1/app/xxxxxxxx
   `GEMINI_ACCOUNT_INDEX`，或为目标账号重新保存 DPAPI Cookie。
 - **网页还在生成时调用失败：** 等网页回复完成后重试。服务器不会退回旧分支或误发
   到新会话。
+- **明明能读取会话却提示仍在生成：** Gemini 的完成状态字段优先于富内容中的兼容
+  字段；当前版本已兼容“状态 2 表示已完成”的网页响应，并有回归测试覆盖。若将来
+  Google 再次调整协议，先更新本 Fork 并运行 `tests/test_chat_binding.py`。
 - **认证失效：** 先调用 `gemini_reset`；仍失败再更新本机 DPAPI Cookie。
 - **代理环境无法连接：** Windows 启动器会读取当前用户的系统 HTTP/HTTPS 代理，并
   通过 `GEMINI_PROXY` 传给底层客户端。

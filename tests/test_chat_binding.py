@@ -86,3 +86,15 @@ def test_latest_chat_metadata_waits_when_streaming_candidate_already_has_rcid():
     body = [[[ ["c_abc123", "r_pending"], None, [["pending user"]], [[candidate]] ]]]
 
     assert latest_chat_metadata_from_body(body, "c_abc123") is None
+
+
+def test_latest_chat_metadata_accepts_explicit_completed_candidate():
+    candidate = ["rc_complete"] + [None] * 7 + [[2]] + [None] * 3
+    candidate.append([{"7": ["completed-response-metadata"]}])
+    body = [[[ ["c_abc123", "r_complete"], None, [["user"]], [[candidate]] ]]]
+
+    assert latest_chat_metadata_from_body(body, "c_abc123") == [
+        "c_abc123",
+        "r_complete",
+        "rc_complete",
+    ]
