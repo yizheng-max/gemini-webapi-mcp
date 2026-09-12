@@ -175,6 +175,7 @@ uv run --with "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-weba
 | `GEMINI_PSIDTS` | Значение cookie `__Secure-1PSIDTS` | авто из Chrome |
 | `GEMINI_LANGUAGE` | Язык ответов Gemini (`ru`, `en`, `ja`, ...) | `en` |
 | `GEMINI_ACCOUNT_INDEX` | Индекс Google-аккаунта (0, 1, 2, ...) | `0` |
+| `GEMINI_BINDING_FILE` | Путь к локальному JSON-файлу привязки существующего Gemini Web-чата | отключено |
 
 ## Высокое разрешение (2x)
 
@@ -211,6 +212,9 @@ Gemini добавляет sparkle-метку (четырёхконечную з�
 | `gemini_analyze_url` | Анализ URL — YouTube-видео, веб-страницы, статьи |
 | `gemini_chat` | Текстовый чат (одиночный или multi-turn) |
 | `gemini_start_chat` | Начать multi-turn сессию |
+| `gemini_bind_chat` | Привязать обычные вызовы `gemini_chat` к существующему Gemini Web-чату по URL или ID |
+| `gemini_binding_status` | Показать текущую привязку Gemini Web-чата |
+| `gemini_unbind_chat` | Удалить текущую привязку Gemini Web-чата |
 | `gemini_reset` | Переинициализация клиента при ошибках авторизации |
 
 ## Модели
@@ -434,6 +438,7 @@ If cookie auto-detection fails, set them manually:
 | `GEMINI_PSIDTS` | Cookie value `__Secure-1PSIDTS` | auto from Chrome |
 | `GEMINI_LANGUAGE` | Gemini response language (`ru`, `en`, `ja`, ...) | `en` |
 | `GEMINI_ACCOUNT_INDEX` | Google account index (0, 1, 2, ...) | `0` |
+| `GEMINI_BINDING_FILE` | Path to a local JSON file that binds an existing Gemini Web chat | disabled |
 
 ## High Resolution (2x)
 
@@ -470,6 +475,9 @@ The only calibrated invariant is the star shape in `src/gemini_webapi_mcp/assets
 | `gemini_analyze_url` | Analyze URLs — YouTube videos, webpages, articles |
 | `gemini_chat` | Text chat (single or multi-turn) |
 | `gemini_start_chat` | Start a multi-turn session |
+| `gemini_bind_chat` | Bind normal `gemini_chat` calls to an existing Gemini Web chat by URL or ID |
+| `gemini_binding_status` | Show the current Gemini Web chat binding |
+| `gemini_unbind_chat` | Remove the current Gemini Web chat binding |
 | `gemini_reset` | Re-initialize client on auth errors |
 
 ## Models

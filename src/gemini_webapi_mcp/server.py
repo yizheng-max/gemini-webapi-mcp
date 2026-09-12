@@ -22,6 +22,12 @@ from typing import Optional
 
 from mcp.server.fastmcp import FastMCP, Context
 
+from .chat_binding import (
+    ChatBindingStore,
+    latest_chat_metadata_from_body,
+    normalize_gemini_chat_id,
+)
+
 # ---------------------------------------------------------------------------
 # Logging (stderr only — stdout reserved for MCP stdio transport)
 # ---------------------------------------------------------------------------
@@ -333,6 +339,43 @@ def _get_client(ctx: Context):
 
 def _get_sessions(ctx: Context) -> dict:
     return ctx.request_context.lifespan_context["chat_sessions"]
+
+
+def _binding_store() -> ChatBindingStore | None:
+    path = os.environ.get("GEMINI_BINDING_FILE")
+    return ChatBindingStore(Path(path)) if path else None
+
+
+async def _sync_bound_chat_metadata(client, cid: str) -> list[str] | None:
+    """Read the newest browser-side turn and return ``[cid, rid, rcid]``."""
+    from gemini_webapi.constants import GRPC
+    from gemini_webapi.types import RPCData
+    from gemini_webapi.utils import extract_json_from_response
+
+    payload = json.dumps([cid, 10, None, 1, [1], [4], None, 1])
+    response = await client._batch_execute(
+        [RPCData(rpcid=GRPC.READ_CHAT, payload=payload)]
+    )
+    for part in extract_json_from_response(response.text):
+        if not isinstance(part, list) or len(part) < 3 or not part[2]:
+            continue
+        try:
+            body = json.loads(part[2]) if isinstance(part[2], str) else part[2]
+        except (json.JSONDecodeError, TypeError):
+            continue
+        metadata = latest_chat_metadata_from_body(body, cid)
+        if metadata is not None:
+            return metadata
+        # A real turn with no rcid is the newest browser response still running.
+        # Do not continue to an older frame and silently lose that user turn.
+        if (
+            isinstance(body, list)
+            and body
+            and isinstance(body[0], list)
+            and body[0]
+        ):
+            return None
+    return None
 
 
 _image_mode = False
@@ -669,6 +712,95 @@ async def _fetch_download_url(client, token: str, prompt: str, metadata: list, i
 # ---------------------------------------------------------------------------
 
 @mcp.tool(
+    name="gemini_bind_chat",
+    annotations={
+        "title": "Bind Gemini Web Chat",
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    },
+)
+async def gemini_bind_chat(
+    chat_url_or_id: str,
+    ctx: Context,
+    model: Optional[str] = None,
+) -> str:
+    """Bind normal gemini_chat calls to one existing Gemini Web conversation."""
+    try:
+        store = _binding_store()
+        if store is None:
+            raise RuntimeError("GEMINI_BINDING_FILE is not configured")
+        cid = normalize_gemini_chat_id(chat_url_or_id)
+        metadata = await _sync_bound_chat_metadata(_get_client(ctx), cid)
+        if metadata is None:
+            raise RuntimeError(
+                "Gemini conversation could not be read, or its newest response is still incomplete"
+            )
+        selected_model = model or DEFAULT_MODEL
+        store.save(cid, selected_model)
+        return json.dumps(
+            {"bound": True, "chat_id": cid, "model": selected_model}
+        )
+    except Exception as e:
+        return _handle_error(e)
+
+
+@mcp.tool(
+    name="gemini_binding_status",
+    annotations={
+        "title": "Gemini Web Chat Binding Status",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    },
+)
+async def gemini_binding_status() -> str:
+    """Report which Gemini Web conversation normal gemini_chat calls use."""
+    try:
+        store = _binding_store()
+        binding = store.load() if store else None
+        return json.dumps(
+            {
+                "bound": binding is not None,
+                "chat_id": binding["cid"] if binding else None,
+                "model": binding["model"] if binding else None,
+            }
+        )
+    except Exception as e:
+        return _handle_error(e)
+
+
+@mcp.tool(
+    name="gemini_unbind_chat",
+    annotations={
+        "title": "Unbind Gemini Web Chat",
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    },
+)
+async def gemini_unbind_chat() -> str:
+    """Stop routing normal gemini_chat calls to a saved Web conversation."""
+    try:
+        store = _binding_store()
+        if store is None:
+            raise RuntimeError("GEMINI_BINDING_FILE is not configured")
+        binding = store.load()
+        store.remove()
+        return json.dumps(
+            {
+                "bound": False,
+                "removed_chat_id": binding["cid"] if binding else None,
+            }
+        )
+    except Exception as e:
+        return _handle_error(e)
+
+
+@mcp.tool(
     name="gemini_start_chat",
     annotations={
         "title": "Start Gemini Chat Session",
@@ -746,9 +878,23 @@ async def gemini_chat(
                 return f"Error: Session '{session_id}' not found. Start a new one with gemini_start_chat."
             response = await chat.send_message(prompt)
         else:
-            response = await client.generate_content(
-                prompt, model=model or DEFAULT_MODEL
-            )
+            store = _binding_store()
+            binding = store.load() if store else None
+            if binding:
+                metadata = await _sync_bound_chat_metadata(client, binding["cid"])
+                if metadata is None:
+                    raise RuntimeError(
+                        "Bound Gemini conversation could not be read, or its newest response is still incomplete; retry after the browser response finishes"
+                    )
+                chat = client.start_chat(
+                    model=model or binding["model"] or DEFAULT_MODEL,
+                    metadata=metadata,
+                )
+                response = await chat.send_message(prompt)
+            else:
+                response = await client.generate_content(
+                    prompt, model=model or DEFAULT_MODEL
+                )
 
         text = response.text or "(empty response)"
         thoughts = response.thoughts
