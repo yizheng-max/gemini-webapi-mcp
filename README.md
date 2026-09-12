@@ -6,10 +6,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/AndyShaman/gemini-webapi-mcp/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AndyShaman/gemini-webapi-mcp?style=flat-square&color=green" alt="License"></a>
+  <a href="https://github.com/yizheng-max/gemini-webapi-mcp/blob/main/LICENSE"><img src="https://img.shields.io/github/license/yizheng-max/gemini-webapi-mcp?style=flat-square&color=green" alt="License"></a>
   <img src="https://img.shields.io/badge/python-3.10+-blue?style=flat-square&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/MCP-compatible-8A2BE2?style=flat-square" alt="MCP">
-  <a href="https://github.com/AndyShaman/gemini-webapi-mcp/stargazers"><img src="https://img.shields.io/github/stars/AndyShaman/gemini-webapi-mcp?style=flat-square&color=yellow" alt="Stars"></a>
+  <a href="https://github.com/yizheng-max/gemini-webapi-mcp/stargazers"><img src="https://img.shields.io/github/stars/yizheng-max/gemini-webapi-mcp?style=flat-square&color=yellow" alt="Stars"></a>
 </p>
 
 <p align="center">
@@ -19,6 +19,11 @@
 </p>
 
 ---
+
+> **Windows + Codex + Chrome 152：** 请参阅完整中文指南
+> [WINDOWS_CODEX_SETUP_ZH.md](WINDOWS_CODEX_SETUP_ZH.md)。内容包括 Chrome Cookie
+> 自动读取、App-Bound Encryption 的安全回退、Windows DPAPI 本地加密、Codex MCP
+> 配置，以及绑定指定 Gemini 网页历史会话。
 
 ## Возможности
 
@@ -41,13 +46,13 @@
 **Из GitHub (без клонирования):**
 
 ```bash
-uv run --with "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git" gemini-webapi-mcp
+uv run --with "gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git" gemini-webapi-mcp
 ```
 
 **Локальная установка:**
 
 ```bash
-git clone https://github.com/AndyShaman/gemini-webapi-mcp.git
+git clone https://github.com/yizheng-max/gemini-webapi-mcp.git
 cd gemini-webapi-mcp
 uv sync
 uv run gemini-webapi-mcp
@@ -59,7 +64,7 @@ uv run gemini-webapi-mcp
 <summary><b>Claude Code</b></summary>
 
 ```bash
-claude mcp add-json gemini '{"command":"uv","args":["run","--with","gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git","gemini-webapi-mcp"]}'
+claude mcp add-json gemini '{"command":"uv","args":["run","--with","gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git","gemini-webapi-mcp"]}'
 ```
 
 Или добавьте вручную в `.mcp.json` в корне проекта:
@@ -69,7 +74,7 @@ claude mcp add-json gemini '{"command":"uv","args":["run","--with","gemini-webap
   "mcpServers": {
     "gemini": {
       "command": "uv",
-      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git", "gemini-webapi-mcp"]
+      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git", "gemini-webapi-mcp"]
     }
   }
 }
@@ -89,7 +94,7 @@ claude mcp add-json gemini '{"command":"uv","args":["run","--with","gemini-webap
   "mcpServers": {
     "gemini": {
       "command": "uv",
-      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git", "gemini-webapi-mcp"]
+      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git", "gemini-webapi-mcp"]
     }
   }
 }
@@ -107,7 +112,7 @@ claude mcp add-json gemini '{"command":"uv","args":["run","--with","gemini-webap
   "mcpServers": {
     "gemini": {
       "command": "uv",
-      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git", "gemini-webapi-mcp"]
+      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git", "gemini-webapi-mcp"]
     }
   }
 }
@@ -135,7 +140,7 @@ cp -r skill ~/.claude/skills/gemini-mcp
 Запустите сервер вручную — если инициализация прошла без ошибок, всё работает:
 
 ```bash
-uv run --with "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git" gemini-webapi-mcp
+uv run --with "gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git" gemini-webapi-mcp
 ```
 
 После этого откройте Claude Code или Claude Desktop и попробуйте: *«Сгенерируй картинку кота в акварельном стиле через Gemini»*.
@@ -157,7 +162,7 @@ uv run --with "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-weba
   "mcpServers": {
     "gemini": {
       "command": "uv",
-      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git", "gemini-webapi-mcp"],
+      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git", "gemini-webapi-mcp"],
       "env": {
         "GEMINI_PSID": "your__Secure-1PSID_value",
         "GEMINI_PSIDTS": "your__Secure-1PSIDTS_value"
@@ -257,7 +262,7 @@ gemini_upload_file(file_path="/path/to/doc.pdf", prompt="Сделай кратк
 
 [AGPL-3.0](LICENSE) — свободно используйте, модифицируйте и распространяйте при условии сохранения открытости исходного кода.
 
-**[@AndyShaman](https://github.com/AndyShaman)** · [gemini-webapi-mcp](https://github.com/AndyShaman/gemini-webapi-mcp)
+**Upstream:** [@AndyShaman](https://github.com/AndyShaman) · [AndyShaman/gemini-webapi-mcp](https://github.com/AndyShaman/gemini-webapi-mcp)
 
 ---
 
@@ -269,10 +274,10 @@ gemini_upload_file(file_path="/path/to/doc.pdf", prompt="Сделай кратк
 </p>
 
 <p align="center">
-  <a href="https://github.com/AndyShaman/gemini-webapi-mcp/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AndyShaman/gemini-webapi-mcp?style=flat-square&color=green" alt="License"></a>
+  <a href="https://github.com/yizheng-max/gemini-webapi-mcp/blob/main/LICENSE"><img src="https://img.shields.io/github/license/yizheng-max/gemini-webapi-mcp?style=flat-square&color=green" alt="License"></a>
   <img src="https://img.shields.io/badge/python-3.10+-blue?style=flat-square&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/MCP-compatible-8A2BE2?style=flat-square" alt="MCP">
-  <a href="https://github.com/AndyShaman/gemini-webapi-mcp/stargazers"><img src="https://img.shields.io/github/stars/AndyShaman/gemini-webapi-mcp?style=flat-square&color=yellow" alt="Stars"></a>
+  <a href="https://github.com/yizheng-max/gemini-webapi-mcp/stargazers"><img src="https://img.shields.io/github/stars/yizheng-max/gemini-webapi-mcp?style=flat-square&color=yellow" alt="Stars"></a>
 </p>
 
 <p align="center">
@@ -304,13 +309,13 @@ Open Chrome, go to [gemini.google.com](https://gemini.google.com) and sign in.
 **From GitHub (no clone needed):**
 
 ```bash
-uv run --with "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git" gemini-webapi-mcp
+uv run --with "gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git" gemini-webapi-mcp
 ```
 
 **Local install:**
 
 ```bash
-git clone https://github.com/AndyShaman/gemini-webapi-mcp.git
+git clone https://github.com/yizheng-max/gemini-webapi-mcp.git
 cd gemini-webapi-mcp
 uv sync
 uv run gemini-webapi-mcp
@@ -322,7 +327,7 @@ uv run gemini-webapi-mcp
 <summary><b>Claude Code</b></summary>
 
 ```bash
-claude mcp add-json gemini '{"command":"uv","args":["run","--with","gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git","gemini-webapi-mcp"]}'
+claude mcp add-json gemini '{"command":"uv","args":["run","--with","gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git","gemini-webapi-mcp"]}'
 ```
 
 Or add manually to `.mcp.json` in your project root:
@@ -332,7 +337,7 @@ Or add manually to `.mcp.json` in your project root:
   "mcpServers": {
     "gemini": {
       "command": "uv",
-      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git", "gemini-webapi-mcp"]
+      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git", "gemini-webapi-mcp"]
     }
   }
 }
@@ -352,7 +357,7 @@ Add to Claude Desktop config:
   "mcpServers": {
     "gemini": {
       "command": "uv",
-      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git", "gemini-webapi-mcp"]
+      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git", "gemini-webapi-mcp"]
     }
   }
 }
@@ -370,7 +375,7 @@ Use the standard MCP stdio config:
   "mcpServers": {
     "gemini": {
       "command": "uv",
-      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git", "gemini-webapi-mcp"]
+      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git", "gemini-webapi-mcp"]
     }
   }
 }
@@ -398,7 +403,7 @@ cp -r skill ~/.claude/skills/gemini-mcp
 Run the server manually — if it initializes without errors, everything works:
 
 ```bash
-uv run --with "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git" gemini-webapi-mcp
+uv run --with "gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git" gemini-webapi-mcp
 ```
 
 Then open Claude Code or Claude Desktop and try: *"Generate a watercolor cat image with Gemini"*.
@@ -420,7 +425,7 @@ If cookie auto-detection fails, set them manually:
   "mcpServers": {
     "gemini": {
       "command": "uv",
-      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/AndyShaman/gemini-webapi-mcp.git", "gemini-webapi-mcp"],
+      "args": ["run", "--with", "gemini-webapi-mcp @ git+https://github.com/yizheng-max/gemini-webapi-mcp.git", "gemini-webapi-mcp"],
       "env": {
         "GEMINI_PSID": "your__Secure-1PSID_value",
         "GEMINI_PSIDTS": "your__Secure-1PSIDTS_value"
@@ -520,4 +525,4 @@ The watermark-removal algorithm (Reverse Alpha Blending) was originally inspired
 
 [AGPL-3.0](LICENSE) — free to use, modify, and distribute, provided the source code remains open.
 
-**[@AndyShaman](https://github.com/AndyShaman)** · [gemini-webapi-mcp](https://github.com/AndyShaman/gemini-webapi-mcp)
+**Upstream:** [@AndyShaman](https://github.com/AndyShaman) · [AndyShaman/gemini-webapi-mcp](https://github.com/AndyShaman/gemini-webapi-mcp)

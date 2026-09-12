@@ -17,6 +17,12 @@ build/
 .uv/
 uv.lock
 
+# Gemini Web credentials and local chat bindings (never commit)
+cookies.dpapi.json
+bound-chat.json
+*.credentials.json
+*.secrets.json
+
 # gwt-mini binary — installed via `python scripts/install_gwt.py`, not committed
 /tools/gwt/
 

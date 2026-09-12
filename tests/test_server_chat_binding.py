@@ -15,6 +15,11 @@ class FakeChat:
         return SimpleNamespace(text=self.response_text, thoughts=None)
 
 
+def test_resolve_proxy_uses_explicit_launcher_value(monkeypatch):
+    monkeypatch.setenv("GEMINI_PROXY", "http://127.0.0.1:7890")
+    assert server._resolve_proxy() == "http://127.0.0.1:7890"
+
+
 class FakeClient:
     def __init__(self, read_body):
         self.read_body = read_body
@@ -27,7 +32,7 @@ class FakeClient:
         frame = [["wrb.fr", "hNvQHb", json.dumps(self.read_body)]]
         return SimpleNamespace(text=json.dumps(frame))
 
-    def start_chat(self, *, model, metadata=None):
+    def start_chat(self, *, model=None, metadata=None):
         chat = FakeChat()
         self.started_chats.append((model, metadata, chat))
         return chat
@@ -81,6 +86,36 @@ def test_bind_chat_reads_conversation_and_persists_binding(tmp_path, monkeypatch
         "model": "gemini-3.0-pro",
     }
     assert len(client.batch_payloads) == 1
+
+
+def test_bind_without_model_preserves_the_web_conversation_model(
+    tmp_path, monkeypatch
+):
+    binding_file = tmp_path / "bound-chat.json"
+    monkeypatch.setenv("GEMINI_BINDING_FILE", str(binding_file))
+    client = FakeClient(completed_chat_body())
+
+    bind_result = asyncio.run(
+        server.gemini_bind_chat(
+            "https://gemini.google.com/app/abc123",
+            make_context(client),
+        )
+    )
+    chat_result = asyncio.run(
+        server.gemini_chat("keep the current model", make_context(client))
+    )
+
+    assert json.loads(bind_result) == {
+        "bound": True,
+        "chat_id": "c_abc123",
+        "model": None,
+    }
+    assert json.loads(binding_file.read_text(encoding="utf-8")) == {
+        "cid": "c_abc123",
+        "model": None,
+    }
+    assert chat_result == "ok"
+    assert client.started_chats[-1][0] is None
 
 
 def test_chat_syncs_and_continues_the_bound_browser_conversation(tmp_path, monkeypatch):

@@ -305,6 +305,11 @@ def _make_gen_id() -> str:
     return (base * 3)[:16]
 
 
+def _resolve_proxy() -> str | None:
+    """Return the explicit proxy supplied by the local MCP launcher."""
+    return os.environ.get("GEMINI_PROXY") or None
+
+
 # ---------------------------------------------------------------------------
 # Lifespan: initialise GeminiClient once, reuse across all tool calls
 # ---------------------------------------------------------------------------
@@ -316,15 +321,24 @@ async def app_lifespan(server):
     psid, psidts = _resolve_cookies()
 
     account_index = int(os.environ.get("GEMINI_ACCOUNT_INDEX", "0"))
-    client = GeminiClient(secure_1psid=psid, secure_1psidts=psidts or None, account_index=account_index)
+    client = GeminiClient(
+        secure_1psid=psid,
+        secure_1psidts=psidts or None,
+        account_index=account_index,
+        proxy=_resolve_proxy(),
+    )
     if account_index:
         logger.info("Using Google account index: %d", account_index)
     await client.init(timeout=300, watchdog_timeout=45, auto_close=False, auto_refresh=True)
     _patch_client(client)
 
-    yield {"gemini_client": client, "chat_sessions": {}}
-
-    await client.close()
+    state = {"gemini_client": client, "chat_sessions": {}}
+    try:
+        yield state
+    finally:
+        # gemini_reset replaces the client in this mutable lifespan state.
+        # Always close the active instance, not the already-closed original.
+        await state["gemini_client"].close()
 
 
 mcp = FastMCP("gemini-webapi-mcp", lifespan=app_lifespan)
@@ -737,7 +751,7 @@ async def gemini_bind_chat(
             raise RuntimeError(
                 "Gemini conversation could not be read, or its newest response is still incomplete"
             )
-        selected_model = model or DEFAULT_MODEL
+        selected_model = model or None
         store.save(cid, selected_model)
         return json.dumps(
             {"bound": True, "chat_id": cid, "model": selected_model}
@@ -886,10 +900,11 @@ async def gemini_chat(
                     raise RuntimeError(
                         "Bound Gemini conversation could not be read, or its newest response is still incomplete; retry after the browser response finishes"
                     )
-                chat = client.start_chat(
-                    model=model or binding["model"] or DEFAULT_MODEL,
-                    metadata=metadata,
-                )
+                chat_options = {"metadata": metadata}
+                selected_model = model or binding["model"]
+                if selected_model:
+                    chat_options["model"] = selected_model
+                chat = client.start_chat(**chat_options)
                 response = await chat.send_message(prompt)
             else:
                 response = await client.generate_content(
@@ -1194,7 +1209,10 @@ async def gemini_reset(ctx: Context) -> str:
 
         account_index = int(os.environ.get("GEMINI_ACCOUNT_INDEX", "0"))
         new_client = GeminiClient(
-            secure_1psid=psid, secure_1psidts=psidts or None, account_index=account_index
+            secure_1psid=psid,
+            secure_1psidts=psidts or None,
+            account_index=account_index,
+            proxy=_resolve_proxy(),
         )
         await new_client.init(timeout=300, watchdog_timeout=45, auto_close=False, auto_refresh=True)
         _patch_client(new_client)
